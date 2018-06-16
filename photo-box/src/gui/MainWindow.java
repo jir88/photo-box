@@ -17,6 +17,12 @@ import javax.swing.JLabel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
+import javax.swing.JMenuBar;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+import java.awt.event.KeyEvent;
+import java.awt.event.InputEvent;
 
 public class MainWindow extends JFrame {
 	private static final long serialVersionUID = -4428832150514821377L;
@@ -44,7 +50,42 @@ public class MainWindow extends JFrame {
 	public MainWindow() {
 		setTitle("Photo Box");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 519, 337);
+		setBounds(100, 100, 871, 494);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenu mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+		
+		JMenuItem mntmImport = new JMenuItem("Import...");
+		mntmImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_MASK));
+		mnFile.add(mntmImport);
+		
+		JMenuItem mntmNewAlbum = new JMenuItem("New Album...");
+		mnFile.add(mntmNewAlbum);
+		
+		JMenuItem mntmQuit = new JMenuItem("Quit");
+		mntmQuit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		mnFile.add(mntmQuit);
+		
+		JMenu mnEdit = new JMenu("Edit");
+		menuBar.add(mnEdit);
+		
+		JMenuItem mntmEditPhoto = new JMenuItem("Edit Photo");
+		mnEdit.add(mntmEditPhoto);
+		
+		JMenuItem mntmPreferences = new JMenuItem("Preferences...");
+		mnEdit.add(mntmPreferences);
+		
+		JMenu mnView = new JMenu("View");
+		menuBar.add(mnView);
+		
+		JMenu mnHelp = new JMenu("Help");
+		menuBar.add(mnHelp);
+		
+		JMenuItem mntmAbout = new JMenuItem("About...");
+		mnHelp.add(mntmAbout);
 		myContentPane = new JPanel();
 		myContentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(myContentPane);
