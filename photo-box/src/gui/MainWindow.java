@@ -2,10 +2,14 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import main.Main;
+
 import javax.swing.JToolBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
@@ -102,6 +106,15 @@ public class MainWindow extends JFrame {
 		
 		JSplitPane photosSplitPane = new JSplitPane();
 		treeSplitPane.setRightComponent(photosSplitPane);
+		
+		// put in the custom album display panel here
+		// as an initial test, we'll just arbitrarily display some pictures here
+		File picDir = new File("/home/john/Documents/miscellaneous/art");
+		PhotoDisplayPanel photoDispPanel = new PhotoDisplayPanel(Main.loadPhotos(picDir));
+		
+		JScrollPane photoScrollPane = new JScrollPane();
+		photoScrollPane.setViewportView(photoDispPanel);
+		photosSplitPane.setLeftComponent(photoScrollPane);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		photosSplitPane.setRightComponent(scrollPane);

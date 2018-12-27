@@ -3,19 +3,22 @@
  */
 package main;
 
+import java.awt.Dimension;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 
+import javax.imageio.ImageIO;
+
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
-import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
-import com.drew.metadata.file.FileSystemDirectory;
 
 /**
  * @author john
@@ -30,6 +33,10 @@ public class Photo {
 	 * The metadata stored in this photo, such as camera settings and
 	 */
 	private Metadata myMetadata;
+	/**
+	 * A small version of this image.
+	 */
+	private BufferedImage myThumbnail;
 	
 	/**
 	 * Constructs a Photo object for a particular image file.
@@ -44,6 +51,9 @@ public class Photo {
 		
 		// read the photo metadata
 		myMetadata = ImageMetadataReader.readMetadata(myLocation);
+		
+		// set the thumbnail to null -- we load it lazily if requested
+		myThumbnail = null;
 	}
 	
 	/**
@@ -123,6 +133,60 @@ public class Photo {
 	 */
 	public void setMetadata(Metadata metadata) {
 		myMetadata = metadata;
+	}
+	
+	/**
+	 * Get a small thumbnail of this photo. If the aspect ratio does not match
+	 * the size requested, the photo is scaled to fit.
+	 * @param size the size of the thumbnail, in pixels
+	 * @return the thumbnail
+	 * @throws IOException if there is an error while loading the thumbnail
+	 */
+	public BufferedImage getThumbnail(Dimension size) throws IOException {
+		BufferedImage img;
+		AffineTransformOp scaleOp;
+		double heightScale, widthScale, imgScale;
+		double imgAspect, desiredAspect;
+		
+		// if we already have a thumbnail loaded, check to see if it is the right size
+		if(myThumbnail != null) {
+			// calculate aspect ratios for thumbnail and target sizes
+			imgAspect = ((double)myThumbnail.getWidth())/myThumbnail.getHeight();
+			desiredAspect = size.getWidth()/size.getHeight();
+			// if thumb is wider than the desired size
+			if(imgAspect > desiredAspect) {
+				// we just need to make sure the thumb's width is correct
+				if(myThumbnail.getWidth() == size.width) {
+					return myThumbnail;
+				}
+			} else { // thumb is narrower, make sure height is correct
+				if(myThumbnail.getHeight() == size.height) {
+					return myThumbnail;
+				}
+			}
+//			if(myThumbnail.getHeight() == size.height &&
+//					myThumbnail.getWidth() == size.width) {
+//				// thumbnail is the right size, so just return it
+//				return myThumbnail;
+//			}
+		} 
+		// thumbnail isn't loaded or is wrong size, so we need to load it now
+		
+		// read full image from file
+		img = ImageIO.read(myLocation);
+		// figure out how much it needs to be scaled
+		heightScale = size.getHeight()/img.getHeight();
+		widthScale = size.getWidth()/img.getWidth();
+		// use whichever axis needs to be scaled the most
+		imgScale = Math.min(heightScale, widthScale);
+		// create an image scaling object
+		scaleOp = new AffineTransformOp(
+				AffineTransform.getScaleInstance(imgScale, imgScale), 
+				AffineTransformOp.TYPE_BILINEAR);
+		// draw the scaled image
+		myThumbnail = scaleOp.filter(img, null);
+		// return the thumbnail
+		return myThumbnail;
 	}
 
 	/* (non-Javadoc)
